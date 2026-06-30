@@ -1,0 +1,43 @@
+appId: com.opendb.desktop
+productName: openDB
+copyright: Copyright © 2026 openDB
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - main.js
+  - preload.js
+  - package.json
+
+extraResources:
+  - from: ../backend/target/opendb-server-0.2.0.jar
+    to: backend/app.jar
+  - from: jre
+    to: jre
+    filter:
+      - "**/*"
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
+  artifactName: openDB-${version}-mac-${arch}.${ext}
+
+win:
+  target:
+    - nsis
+  artifactName: openDB-${version}-win-${arch}.${ext}
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+  artifactName: openDB-${version}-linux-${arch}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

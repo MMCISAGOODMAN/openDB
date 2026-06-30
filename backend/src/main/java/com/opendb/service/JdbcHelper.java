@@ -36,7 +36,7 @@ final class JdbcHelper {
         SqlDialect dialect = dialect(managed);
         try {
             Connection connection = managed.getActiveConnection();
-            if (managed.getConfig().getType() == DatabaseType.POSTGRESQL) {
+            if (isPostgresLike(managed.getConfig().getType())) {
                 connection.setCatalog(namespace);
             }
             try (Statement statement = connection.createStatement()) {
@@ -45,6 +45,12 @@ final class JdbcHelper {
         } catch (SQLException e) {
             throw new OpenDbException("Failed to switch namespace: " + e.getMessage(), e);
         }
+    }
+
+    static boolean isPostgresLike(DatabaseType type) {
+        return type == DatabaseType.POSTGRESQL
+                || type == DatabaseType.KINGBASE
+                || type == DatabaseType.OPENGAUSS;
     }
 
     static String csvEscape(String value) {

@@ -12,6 +12,7 @@ Thumbs.db
 # Backend
 backend/target/
 backend/data/
+backend/src/main/resources/static/
 backend/.mvn/wrapper/maven-wrapper.jar
 backend/.classpath
 backend/.project
@@ -33,3 +34,8 @@ logs/
 # Env secrets
 .env
 *.pem
+
+# Desktop
+desktop/node_modules/
+desktop/dist/
+desktop/jre/

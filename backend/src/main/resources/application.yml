@@ -1,11 +1,13 @@
 server:
-  port: 8080
+  port: ${OPENDDB_SERVER_PORT:8080}
 
 spring:
   application:
     name: opendb-server
 
 opendb:
+  data-dir: ${OPENDDB_DATA_DIR:./data}
+  drivers-dir: ${OPENDDB_DRIVERS_DIR:}
   ai:
     enabled: ${OPENDDB_AI_ENABLED:false}
     api-url: ${OPENDDB_AI_API_URL:https://api.openai.com/v1/chat/completions}

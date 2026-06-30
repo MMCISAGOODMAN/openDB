@@ -2,6 +2,7 @@ package com.opendb.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opendb.config.AiProperties;
+import com.opendb.config.OpenDbProperties;
 import com.opendb.dto.AiConfigRequest;
 import com.opendb.dto.AiConfigResponse;
 import com.opendb.dto.AiProviderPresetResponse;
@@ -9,6 +10,7 @@ import com.opendb.exception.OpenDbException;
 import com.opendb.model.AiConfig;
 import com.opendb.model.AiProviderType;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,20 +22,23 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AiConfigService {
 
     private final AiProperties aiProperties;
+    private final OpenDbProperties openDbProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Path storagePath;
     private AiConfig config = new AiConfig();
 
-    public AiConfigService(AiProperties aiProperties) {
-        this.aiProperties = aiProperties;
-    }
-
     @PostConstruct
     void init() {
-        storagePath = Path.of("data", "ai-config.json");
+        storagePath = openDbProperties.getDataDir().resolve("ai-config.json");
+        try {
+            Files.createDirectories(openDbProperties.getDataDir());
+        } catch (IOException e) {
+            log.warn("Could not create data directory {}: {}", openDbProperties.getDataDir(), e.getMessage());
+        }
         loadFromDisk();
     }
 

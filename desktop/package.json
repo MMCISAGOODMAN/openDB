@@ -1,0 +1,20 @@
+{
+  "name": "opendb-desktop",
+  "version": "0.2.0",
+  "description": "openDB desktop client",
+  "main": "main.js",
+  "private": true,
+  "author": "openDB",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --config electron-builder.yml",
+    "dist:mac": "electron-builder --mac --config electron-builder.yml",
+    "dist:win": "electron-builder --win --config electron-builder.yml",
+    "dist:linux": "electron-builder --linux --config electron-builder.yml"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

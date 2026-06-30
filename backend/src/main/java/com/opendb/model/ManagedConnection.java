@@ -1,5 +1,6 @@
 package com.opendb.model;
 
+import com.opendb.config.JdbcDriverLoader;
 import com.opendb.dialect.DialectRegistry;
 import com.opendb.dialect.SqlDialect;
 import com.opendb.dto.ConnectionRequest;
@@ -17,22 +18,26 @@ public class ManagedConnection {
     private final ConnectionRequest config;
     private final String profileId;
     private final SqlDialect dialect;
+    private final JdbcDriverLoader driverLoader;
     private Connection connection;
 
-    public ManagedConnection(String id, ConnectionRequest config, SqlDialect dialect) {
-        this(id, config, null, dialect);
+    public ManagedConnection(String id, ConnectionRequest config, SqlDialect dialect, JdbcDriverLoader driverLoader) {
+        this(id, config, null, dialect, driverLoader);
     }
 
-    public ManagedConnection(String id, ConnectionRequest config, String profileId, SqlDialect dialect) {
+    public ManagedConnection(String id, ConnectionRequest config, String profileId, SqlDialect dialect,
+                             JdbcDriverLoader driverLoader) {
         this.id = id;
         this.config = config;
         this.profileId = profileId;
         this.dialect = dialect;
+        this.driverLoader = driverLoader;
     }
 
-    public static ManagedConnection create(String id, ConnectionRequest config, String profileId, DialectRegistry registry) {
+    public static ManagedConnection create(String id, ConnectionRequest config, String profileId,
+                                           DialectRegistry registry, JdbcDriverLoader driverLoader) {
         SqlDialect dialect = registry.require(config.getType());
-        return new ManagedConnection(id, config, profileId, dialect);
+        return new ManagedConnection(id, config, profileId, dialect, driverLoader);
     }
 
     public void connect() {
@@ -40,13 +45,11 @@ public class ManagedConnection {
             if (connection != null && !connection.isClosed()) {
                 return;
             }
-            Class.forName(config.getType().getDriverClassName());
+            driverLoader.ensureDriverLoaded(config.getType());
             connection = DriverManager.getConnection(
                     buildJdbcUrl(),
                     dialect.getConnectionProperties(config.getUsername(), config.getPassword())
             );
-        } catch (ClassNotFoundException e) {
-            throw new OpenDbException("Database driver not found: " + config.getType(), e);
         } catch (SQLException e) {
             throw new OpenDbException("Failed to connect: " + e.getMessage(), e);
         }

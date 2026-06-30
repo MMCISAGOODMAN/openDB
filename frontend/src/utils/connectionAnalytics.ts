@@ -81,7 +81,10 @@ export function profileTypeLabel(type: string) {
     MYSQL: 'MySQL',
     POSTGRESQL: 'PostgreSQL',
     ORACLE: 'Oracle',
-    H2: 'H2'
+    H2: 'H2',
+    DM: '达梦 DM8',
+    KINGBASE: 'KingbaseES',
+    OPENGAUSS: 'openGauss'
   }
   return map[type] ?? type
 }

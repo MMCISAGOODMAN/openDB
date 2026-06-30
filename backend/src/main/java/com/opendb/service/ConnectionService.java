@@ -1,5 +1,6 @@
 package com.opendb.service;
 
+import com.opendb.config.JdbcDriverLoader;
 import com.opendb.dto.ConnectionProfileResponse;
 import com.opendb.dto.ConnectionRequest;
 import com.opendb.dto.ConnectionResponse;
@@ -22,6 +23,7 @@ public class ConnectionService {
 
     private final ConnectionProfileService profileService;
     private final DialectRegistry dialectRegistry;
+    private final JdbcDriverLoader driverLoader;
     private final Map<String, ManagedConnection> connections = new ConcurrentHashMap<>();
 
     public ConnectionResponse create(ConnectionRequest request) {
@@ -52,7 +54,7 @@ public class ConnectionService {
     }
 
     public ConnectionResponse test(ConnectionRequest request) {
-        ManagedConnection managed = ManagedConnection.create("test", request, null, dialectRegistry);
+        ManagedConnection managed = ManagedConnection.create("test", request, null, dialectRegistry, driverLoader);
         try {
             managed.connect();
             return ConnectionResponse.builder()
@@ -85,7 +87,7 @@ public class ConnectionService {
         }
 
         String id = UUID.randomUUID().toString();
-        ManagedConnection managed = ManagedConnection.create(id, request, profileId, dialectRegistry);
+        ManagedConnection managed = ManagedConnection.create(id, request, profileId, dialectRegistry, driverLoader);
         managed.connect();
         connections.put(id, managed);
         return toResponse(managed);

@@ -1,5 +1,6 @@
 package com.opendb.service;
 
+import com.opendb.config.OpenDbProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opendb.dto.ConnectionProfileRequest;
@@ -7,6 +8,7 @@ import com.opendb.dto.ConnectionProfileResponse;
 import com.opendb.exception.OpenDbException;
 import com.opendb.model.ConnectionProfile;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +23,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ConnectionProfileService {
 
+    private final OpenDbProperties openDbProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, ConnectionProfile> profiles = new ConcurrentHashMap<>();
     private Path storagePath;
 
     @PostConstruct
     void init() {
-        storagePath = Path.of("data", "connection-profiles.json");
+        storagePath = openDbProperties.getDataDir().resolve("connection-profiles.json");
+        try {
+            Files.createDirectories(openDbProperties.getDataDir());
+        } catch (IOException e) {
+            log.warn("Could not create data directory {}: {}", openDbProperties.getDataDir(), e.getMessage());
+        }
         loadFromDisk();
     }
 

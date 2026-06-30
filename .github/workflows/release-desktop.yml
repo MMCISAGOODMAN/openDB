@@ -1,0 +1,73 @@
+name: Release Desktop
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+          - os: ubuntu-latest
+            platform: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Prepare bundled JRE
+        shell: bash
+        run: |
+          chmod +x scripts/prepare-jre.sh
+          ./scripts/prepare-jre.sh desktop/jre
+
+      - name: Build backend JAR with frontend
+        shell: bash
+        run: |
+          chmod +x scripts/build-desktop.sh
+          ./scripts/build-desktop.sh
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build desktop installer
+        working-directory: desktop
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "mac" ]; then
+            npm run dist:mac
+          elif [ "${{ matrix.platform }}" = "win" ]; then
+            npm run dist:win
+          else
+            npm run dist:linux
+          fi
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: desktop/dist/**/*
+          generate_release_notes: ${{ matrix.platform == 'linux' }}
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
